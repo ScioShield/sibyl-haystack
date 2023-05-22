@@ -34,7 +34,6 @@ An Elastic instance with **open** alerts. I have a provisioning [script](https:/
 
 I would strongly advise to spin up a test cluster first! Wouldn't want to `rm -rf /` prod, unless you really want to wake up on a Monday morning!  
 
-Sending large amounts of data to OpenAI can be quite costly especially for the GPT-4 model, hence the save to file feature.  
 ## Usage
 1. Add your Elasticsearch credentials to a `.env` file in the script directory:  
 Or rename the `.env.example` file to `.env` and change the required felids. Replace the item after "=" with the value, no quotes! The file must be `key=value` per line no comments!  
