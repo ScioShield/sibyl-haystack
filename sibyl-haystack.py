@@ -62,7 +62,7 @@ def query_pipeline(document_store, es_client, index_name):
     reader = FARMReader(model_name_or_path="deepset/roberta-base-squad2", use_gpu=True)
     retriever = EmbeddingRetriever(
         document_store=document_store,
-        embedding_model="sentence-transformers/multi-qa-mpnet-base-dot-v1",
+        embedding_model="sentence-transformers/all-mpnet-base-v2",
         model_format="sentence_transformers"
     )
 
@@ -72,9 +72,9 @@ def query_pipeline(document_store, es_client, index_name):
 
     previous_index_count = int(env_dict.get("PREVIOUS_INDEX_COUNT", 0))
 
-    if current_index_count != previous_index_count:
+    if current_index_count != previous_index_count or current_index_count == 0:
         document_store.update_embeddings(retriever)
-
+    
         env_dict["PREVIOUS_INDEX_COUNT"] = str(current_index_count)
         save_env(env_dict)
 
@@ -176,13 +176,12 @@ def main():
         create_staging_index_if_not_exists(es_client, staging_index_name, mapping_body)
         
         all_alerts = es_client.search(index=original_index_name, size=10000)["hits"]["hits"]
-        
-        update_index_by_query(es_client, staging_index_name, body)
 
         staging_index_count = count_documents(es_client, staging_index_name)
         original_index_count = count_documents(es_client, original_index_name)
         if staging_index_count != original_index_count:
             ingest_alerts_to_staging_index(es_client, staging_index_name, all_alerts)
+            update_index_by_query(es_client, staging_index_name, body)
             document_store = create_document_store(api_credentials)
             index_documents(api_credentials, document_store)
         else:
